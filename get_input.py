@@ -1,21 +1,36 @@
+from rich import pretty
+from rich.console import Console
+from rich.prompt import IntPrompt
+import shutil
 import os
 import requests
 import time
 
 SESSION_FILE = ".session"
+console = Console()
+pretty.install()
 
 
-def get_url(prompt: bool = True) -> str:
+def get_date(prompt: bool = True) -> tuple[int, int]:
+    """
+    Get the data to use.
+    :param prompt: Whether to prompt the user for the date.
+    :return: The date as a tuple of (year, day)
+    """
+    day = int(time.strftime("%d"))
+    year = int(time.strftime("%Y"))
+    if prompt:
+        day = IntPrompt.ask("Day: ", default=day)
+        year = IntPrompt.ask("Year: ", default=year)
+    return year, day
+
+
+def get_url(year: int, day: int) -> str:
     """
     Get the url for the input for the day
     :param prompt: Whether to prompt the user for the day
     :return: The url for the input
     """
-    day = int(time.strftime("%d"))
-    year = int(time.strftime("%Y"))
-    if prompt:
-        day = input("Day: ")
-        year = input("Year: ")
     return f"https://adventofcode.com/{year}/day/{day}/input"
 
 
@@ -48,7 +63,8 @@ def test_session(session: str) -> bool:
     headers = {
         "Cookie": f"session={session}"
     }
-    response = requests.get(get_url(prompt=False), headers=headers, timeout=1)
+    year, day = get_date(prompt=False)
+    response = requests.get(get_url(year, day), headers=headers, timeout=1)
     if response.status_code != 200:
         print("Invalid session cookie.")
         return False
@@ -57,10 +73,49 @@ def test_session(session: str) -> bool:
     return True
 
 
-def main():
+def create_dir(year: int, day: int) -> None:
+    """
+    Create the directory for the day.
+    :param year: The year of the day
+    :param day: The day
+    """
+    path = f"{year}/{day}"
+    if not os.path.exists(path):
+        os.makedirs(path)
+    # Copy template.py to the directory
+    shutil.copy("template.py", f"{path}/solve.py")
+
+
+def get_input(year: int, day: int) -> str:
+    """
+    Get the input for the day.
+    :param year: The year of the day
+    :param day: The day
+    :return: The input
+    """
     headers = {
         "Cookie": f"session={get_session()}"
     }
+    response = requests.get(get_url(year, day), headers=headers, timeout=5)
+    return response.text
+
+
+def save_input(year: int, day: int, input_value: str) -> None:
+    """
+    Save the input to a file.
+    :param year: The year of the day
+    :param day: The day
+    :param input_value: The input
+    """
+    with open(f"{year}/{day}/input.txt", "w", encoding="utf-8") as f:
+        f.write(input_value)
+
+
+def main():
+    year, day = get_date()
+    create_dir(year, day)
+    input_value = get_input(year, day)
+    save_input(year, day, input_value)
 
 
 if __name__ == "__main__":
