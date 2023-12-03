@@ -15,8 +15,31 @@ def display_output(func) -> None:
     print("--- Copied to clipboard ---")
 
 
+def get_calibration_value(number: str) -> int:
+    i = 0
+    first = ""
+    last = ""
+    while i < len(number):
+        if number[i].isdigit():
+            first = number[i]
+            break
+        i += 1
+
+    i = len(number) - 1
+    while i >= 0:
+        if number[i].isdigit():
+            last = number[i]
+            break
+        i -= 1
+    return int(first + last)
+
+
 def main(values: list) -> None:
-    return values
+    result = 0
+    for value in values:
+        output = get_calibration_value(value)
+        result += output
+    return result
 
 
 if __name__ == "__main__":
