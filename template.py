@@ -10,6 +10,7 @@ def display_output(func) -> None:
     result = func(values)
     end = perf_counter()
     print(f"--- Got result in {end-start:.2f}s---")
+    print(result)
     try:
         pyperclip.copy(result)
         print("--- Copied to clipboard ---")
