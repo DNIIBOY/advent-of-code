@@ -10,9 +10,11 @@ def display_output(func) -> None:
     result = func(values)
     end = perf_counter()
     print(f"--- Got result in {end-start:.2f}s---")
-    pyperclip.copy(result)
-    print(result)
-    print("--- Copied to clipboard ---")
+    try:
+        pyperclip.copy(result)
+        print("--- Copied to clipboard ---")
+    except FileNotFoundError:
+        pass
 
 
 def main(values: list) -> None:
