@@ -63,9 +63,8 @@ def test_session(session: str) -> bool:
     headers = {
         "Cookie": f"session={session}"
     }
-    year, day = get_date(prompt=False)
-    response = requests.get(get_url(year, day), headers=headers, timeout=1)
-    if response.status_code != 200:
+    response = requests.get("https://adventofcode.com/auth/login", headers=headers, timeout=1, allow_redirects=False)
+    if response.status_code != 303:
         print("Invalid session cookie.")
         return False
     with open(SESSION_FILE, "w", encoding="utf-8") as f:
